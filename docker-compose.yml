@@ -1,0 +1,54 @@
+version: '3.7'
+
+services:
+  # 1. SERVICIO DE BASE DE DATOS (POSTGRESQL)
+  # Utilizamos una imagen estable y ligera de PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: odoo_db
+    restart: unless-stopped
+    environment:
+      # Credenciales de la Base de Datos. CAMBIA ESTOS VALORES
+      - POSTGRES_DB=odoo_database_name
+      - POSTGRES_USER=odoo_user_name
+      - POSTGRES_PASSWORD=your_secure_password_db
+      # PGDATA define dónde PostgreSQL almacena sus archivos, crucial para la persistencia [2]
+      - PGDATA=/var/lib/postgresql/data/pgdata 
+    volumes:
+      # Volumen persistente para los datos de la DB, llamado 'odoo-db-data' [2, 3]
+      - odoo-db-data:/var/lib/postgresql/data/pgdata 
+      
+  # 2. SERVICIO DE APLICACIÓN (ODOO - COMMUNITY EDITION)
+  odoo:
+    # La imagen 'odoo:latest' corresponde a la versión Community (software libre)
+    image: odoo:latest
+    container_name: odoo_web
+    restart: unless-stopped
+    depends_on:
+      - db # Asegura que la DB se inicie antes que Odoo [4]
+    ports:
+      # Mapeo de Puertos: HOST:CONTENEDOR. Accederás en el puerto 8069 del servidor
+      - "8069:8069"
+    command: odoo -c /etc/odoo/odoo.conf
+    environment:
+      # Odoo usa estas variables para conectarse al servicio 'db'
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=odoo_user_name
+      - DB_PASSWORD=your_secure_password_db
+      - DB_NAME=odoo_database_name
+
+    volumes:
+      # Persistencia de archivos subidos por los usuarios y el filestore de Odoo [5, 6]
+      - odoo-web-data:/var/lib/odoo
+      # Directorio local para montar el archivo odoo.conf (configuración avanzada) [5, 7]
+      - ./config:/etc/odoo
+      # Directorio local para módulos personalizados (addons) [6]
+      - ./addons:/mnt/extra-addons 
+
+# 3. VOLÚMENES NOMBRADOS
+# Estos volúmenes garantizan que los datos permanezcan en el disco del servidor
+# incluso si los contenedores se eliminan [5, 2]
+volumes:
+  odoo-web-data:
+  odoo-db-data:
