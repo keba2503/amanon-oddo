@@ -7,13 +7,16 @@ services:
     image: postgres:15-alpine
     container_name: odoo_db
     restart: unless-stopped
+    ports:
+      # Exponer PostgreSQL para conexiones externas
+      - "5432:5432"
     environment:
       # Credenciales de la Base de Datos. CAMBIA ESTOS VALORES
       - POSTGRES_DB=odoo_database_name
       - POSTGRES_USER=odoo_user_name
       - POSTGRES_PASSWORD=your_secure_password_db
       # PGDATA define dónde PostgreSQL almacena sus archivos, crucial para la persistencia [2]
-      - PGDATA=/var/lib/postgresql/data/pgdata 
+      - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
       # Volumen persistente para los datos de la DB, llamado 'odoo-db-data' [2, 3]
       - odoo-db-data:/var/lib/postgresql/data/pgdata 
