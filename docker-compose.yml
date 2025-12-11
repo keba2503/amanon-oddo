@@ -23,8 +23,11 @@ services:
       
   # 2. SERVICIO DE APLICACIÓN (ODOO - COMMUNITY EDITION)
   odoo:
-    # La imagen 'odoo:latest' corresponde a la versión Community (software libre)
-    image: odoo:latest
+    # Imagen personalizada con dependencias para localización peruana (l10n_pe)
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: odoo-peru:latest
     container_name: odoo_web
     restart: unless-stopped
     depends_on:
