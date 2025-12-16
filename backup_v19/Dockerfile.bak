@@ -1,5 +1,5 @@
 # Dockerfile para Odoo con localización peruana (l10n_pe)
-FROM odoo:18.0
+FROM odoo:latest
 
 USER root
 

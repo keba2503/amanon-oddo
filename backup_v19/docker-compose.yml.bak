@@ -1,3 +1,5 @@
+version: '3.7'
+
 services:
   # 1. SERVICIO DE BASE DE DATOS (POSTGRESQL)
   # Utilizamos una imagen estable y ligera de PostgreSQL
@@ -25,7 +27,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: odoo-peru:18.0
+    image: odoo-peru:latest
     container_name: odoo_web
     restart: unless-stopped
     depends_on:
