@@ -1,0 +1,17 @@
+.card-body {
+    color: inherit;
+}
+.table-sm > :not(caption) > * > * {
+    padding: 0.1rem 0.25rem;
+}
+.card {
+    border-color: #d2d2d2;
+    .card-header,.card-footer {
+        background-color: #f7f5f5!important;
+        border: 1px solid #d2d2d2;
+    }
+    .card-body {
+        background-color: white!important;
+        border: 1px solid #dfdede;
+    }
+}

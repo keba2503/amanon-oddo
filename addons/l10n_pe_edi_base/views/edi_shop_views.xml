@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="l10n_pe_edi_shop_view_tree" model="ir.ui.view">
+        <field name="name">Shops</field>
+        <field name="model">l10n_pe_edi.shop</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name" />
+                <field name="code" />
+                <field name="partner_id" />
+                <field name="send_email" />
+                <field name="company_id" />
+            </list>
+        </field>
+    </record>
+    <record id="l10n_pe_edi_shop_view_form" model="ir.ui.view">
+        <field name="name">Shop</field>
+        <field name="model">l10n_pe_edi.shop</field>
+        <field name="arch" type="xml">
+            <form string="Shop">
+                <sheet>
+                    <group name="group1">
+                        <group>
+                            <field name="name" />
+                            <field
+                                name="company_id"
+                                groups="base.group_multi_company"
+                            />
+                            <field name="partner_id" />
+                        </group>
+                        <group>
+                            <field name="code" />
+                            <field name="send_email" />
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="E-invoice configuration">
+                            <div class="alert alert-info" role="alert">
+                                <strong>Configuration Guide:</strong>
+                                <ul class="mb-0">
+                                    <li>The <strong>PSE / OSE Provider</strong> and <strong>Provider Code</strong> are configured in the Company settings.</li>
+                                    <li>The <strong>URL</strong> and <strong>Token</strong> are specific to this shop and must be configured in the fields below.</li>
+                                    <li>Make sure you have the correct credentials from your EDI provider before configuring these fields.</li>
+                                </ul>
+                            </div>
+                            
+                            <group>
+                                <group string="Company Configuration (Read-only)">
+                                    <field name="l10n_pe_edi_ose_id" readonly="1"/>
+                                    <field name="l10n_pe_edi_ose_code" readonly="1"/>
+                                    <div class="text-muted small">
+                                        <i class="fa fa-info-circle"/> These values are inherited from the company configuration.
+                                    </div>
+                                </group>
+                                <group string="Shop Specific Configuration">
+                                    <field name="l10n_pe_edi_ose_url" 
+                                           placeholder="e.g., https://api.odoofact.com/v1"
+                                           required="1"/>
+                                    <field name="l10n_pe_edi_ose_token" 
+                                           placeholder="Enter your API token here"
+                                           password="True"
+                                           required="1"/>
+                                    <div class="text-muted small">
+                                        <i class="fa fa-info-circle"/> These credentials are provided by your EDI provider.
+                                    </div>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="l10n_pe_edi_shop_view_search" model="ir.ui.view">
+        <field name="name">l10n_pe_edi.shop.view.search</field>
+        <field name="model">l10n_pe_edi.shop</field>
+        <field name="arch" type="xml">
+            <search string="Shops">
+                <field name="name" />
+                <field name="code" />
+                <field name="partner_id" />
+                <field name="company_id" />
+            </search>
+        </field>
+    </record>
+    <record id="l10n_pe_edi_shop_action" model="ir.actions.act_window">
+        <field name="name">Shops</field>
+        <field name="res_model">l10n_pe_edi.shop</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</odoo>

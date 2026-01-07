@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="view_company_form_inherit" model="ir.ui.view">
+        <field name="name">res.company.form.inherit</field>
+        <field name="model">res.company</field>
+        <field name="inherit_id" ref="base.view_company_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//page[2]" position="after">
+                <page name="peruvian_einvoice" string="Peruvian Electronic Invoicing">
+                    <!-- Mensaje informativo -->                   
+                    <div class="mb-3">
+                        <div class="text-muted">
+                            <i class="fa fa-info-circle" title="Information"/> <strong>Configuration Guide:</strong>
+                            <ul class="mt-2 mb-0">
+                                <li>Select your <strong>PSE/OSE Provider</strong> (Odoofact, Nubefact, etc.) in this company configuration.</li>
+                                <li>After selecting the provider, configure the <strong>URL and Token</strong> for each shop/location individually.</li>
+                                <li>Click the "Configure Shops and Tokens" button below to set up your shops.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <group>
+                        <group string="Provider Information">
+                            <field name="l10n_pe_edi_ose_id" 
+                                   options="{'no_create': True, 'no_open': True}"
+                                   required="1"/>
+                            <div class="mt8" invisible="l10n_pe_edi_send_invoice == False">
+                                <button
+                                    name="%(l10n_pe_edi_base.l10n_pe_edi_shop_action)d"
+                                    icon="oi-arrow-right"
+                                    type="action"
+                                    string="Configure Shops and Tokens"
+                                    class="btn-link"                                
+                                />                   
+                            </div>
+                        </group>
+                    </group>
+                    
+                    <separator string="Invoice Configuration"/>
+                    <group>
+                        <group>
+                            <field name="activate_einvoice_ticket"/>
+                            <div class="text-muted small" invisible="not activate_einvoice_ticket">
+                                <i class="fa fa-check-circle text-success" title="Success"/> Electronic tickets are enabled for this company
+                            </div>
+                        </group>
+                        <group>
+                            <field name="l10n_pe_edi_einvoice_config" 
+                                   widget="html"
+                                   placeholder="Additional HTML configuration for electronic invoices"/>
+                        </group>                     
+                    </group>
+                    
+                    <!-- Mensaje de advertencia si Enterprise EDI está instalado -->
+                    <div class="alert alert-warning mt-3" role="alert" 
+                         invisible="l10n_pe_enterprise_edi_installed == False">
+                        <strong><i class="fa fa-exclamation-triangle" title="Warning"/> Warning:</strong>
+                        <p class="mb-2">
+                            <strong>Enterprise EDI Detected:</strong> You have the Odoo Enterprise 
+                            <strong>l10n_pe_edi</strong> module installed. You need to deactivate 
+                            the native UBL sending system to avoid conflicts with your selected provider.
+                        </p>
+                        <p class="mb-2">
+                            <strong>How to deactivate:</strong> Go to your accounting journals and remove 
+                            <strong>"Peru UBL 2.1"</strong> from the <strong>Electronic Data Interchange</strong> field 
+                            (<code>edi_format_ids</code>).
+                        </p>
+                        <p class="mb-0">
+                            <strong>Alternative:</strong> If you cannot remove the UBL format from existing journals, 
+                            create new journals specifically for Odoofact management.
+                        </p>
+                    </div>
+
+                    <!-- Mensaje de advertencia si POS EDI está instalado -->
+                    <div class="alert alert-danger mt-3" role="alert"
+                         invisible="l10n_pe_edi_pos_installed == False">
+                        <strong><i class="fa fa-exclamation-circle" title="Important"/> Important:</strong>
+                        <p class="mb-2">
+                            <strong>Conflict detected:</strong> The Enterprise module <strong>l10n_pe_edi_pos</strong> is installed. This may cause incompatibilities with Odoofact POS integration.
+                        </p>
+                        <p class="mb-2">
+                            <strong>Required action:</strong> Uninstall or disable the <code>l10n_pe_edi_pos</code> Enterprise module (Apps) to avoid conflicts with Odoofact. If you must keep both, use a separate POS without the Enterprise EDI integration.
+                        </p>
+                        <p class="mb-0">
+                            Consult your administrator before proceeding.
+                        </p>
+                    </div>
+                    
+                    <!-- Campo computado para detectar Enterprise -->
+                    <field name="l10n_pe_enterprise_edi_installed" invisible="1"/>
+                    <!-- Campo computado para detectar POS EDI -->
+                    <field name="l10n_pe_edi_pos_installed" invisible="1"/>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>
