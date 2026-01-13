@@ -1,27 +1,21 @@
 services:
   # 1. SERVICIO DE BASE DE DATOS (POSTGRESQL)
-  # Utilizamos una imagen estable y ligera de PostgreSQL
   db:
     image: postgres:15-alpine
     container_name: odoo_db
     restart: unless-stopped
-    ports:
-      # Exponer PostgreSQL para conexiones externas
-      - "5432:5432"
     environment:
-      # Credenciales de la Base de Datos. CAMBIA ESTOS VALORES
       - POSTGRES_DB=odoo_database_name
       - POSTGRES_USER=odoo_user_name
       - POSTGRES_PASSWORD=your_secure_password_db
-      # PGDATA define dónde PostgreSQL almacena sus archivos, crucial para la persistencia [2]
       - PGDATA=/var/lib/postgresql/data/pgdata
     volumes:
-      # Volumen persistente para los datos de la DB, llamado 'odoo-db-data' [2, 3]
-      - odoo-db-data:/var/lib/postgresql/data/pgdata 
-      
-  # 2. SERVICIO DE APLICACIÓN (ODOO - COMMUNITY EDITION)
+      - odoo-db-data:/var/lib/postgresql/data/pgdata
+    networks:
+      - root_default
+
+  # 2. SERVICIO DE APLICACIÓN (ODOO)
   odoo:
-    # Imagen personalizada con dependencias para localización peruana (l10n_pe)
     build:
       context: .
       dockerfile: Dockerfile
@@ -29,30 +23,40 @@ services:
     container_name: odoo_web
     restart: unless-stopped
     depends_on:
-      - db # Asegura que la DB se inicie antes que Odoo [4]
-    ports:
-      # Mapeo de Puertos: HOST:CONTENEDOR. Accederás en el puerto 8069 del servidor
-      - "8069:8069"
+      - db
     command: odoo -c /etc/odoo/odoo.conf
     environment:
-      # Odoo usa estas variables para conectarse al servicio 'db'
       - DB_HOST=db
       - DB_PORT=5432
       - DB_USER=odoo_user_name
       - DB_PASSWORD=your_secure_password_db
       - DB_NAME=odoo_database_name
-
     volumes:
-      # Persistencia de archivos subidos por los usuarios y el filestore de Odoo [5, 6]
       - odoo-web-data:/var/lib/odoo
-      # Directorio local para montar el archivo odoo.conf (configuración avanzada) [5, 7]
       - ./config:/etc/odoo
-      # Directorio local para módulos personalizados (addons) [6]
-      - ./addons:/mnt/extra-addons 
+      - ./addons:/mnt/extra-addons
+    labels:
+      - traefik.enable=true
+      # Router HTTPS principal
+      - traefik.http.routers.odoo.rule=Host(`amanon.shop`)
+      - traefik.http.routers.odoo.entrypoints=websecure
+      - traefik.http.routers.odoo.tls=true
+      - traefik.http.routers.odoo.tls.certresolver=mytlschallenge
+      - traefik.http.services.odoo.loadbalancer.server.port=8069
+      # Router HTTP para redireccion a HTTPS
+      - traefik.http.routers.odoo-http.rule=Host(`amanon.shop`)
+      - traefik.http.routers.odoo-http.entrypoints=web
+      - traefik.http.routers.odoo-http.middlewares=redirect-to-https
+      # Middleware de redireccion
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https
+      - traefik.http.middlewares.redirect-to-https.redirectscheme.permanent=true
+    networks:
+      - root_default
 
-# 3. VOLÚMENES NOMBRADOS
-# Estos volúmenes garantizan que los datos permanezcan en el disco del servidor
-# incluso si los contenedores se eliminan [5, 2]
 volumes:
   odoo-web-data:
   odoo-db-data:
+
+networks:
+  root_default:
+    external: true
